@@ -4,4 +4,4 @@ mediapipe
 ultralytics 
 speechrecognition 
 langdetect
-pyaudio
+poetry
