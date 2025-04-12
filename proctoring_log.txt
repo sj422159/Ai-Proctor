@@ -1,0 +1,32 @@
+[2025-04-06 21:59:36] ⚠️ ALERT: Mobile phone detected!
+[2025-04-06 21:59:41] ⚠️ ALERT: Mobile phone detected!
+[2025-04-06 21:59:44] No face detected! Test access restricted.
+[2025-04-06 21:59:45] No face detected! Test access restricted.
+[2025-04-06 21:59:45] Multiple faces detected! Test access restricted.
+[2025-04-06 21:59:47] ⚠️ ALERT: Mobile phone detected!
+[2025-04-06 21:59:48] Excessive head movement detected!
+[2025-04-06 21:59:49] Excessive head movement detected!
+[2025-04-06 21:59:49] Excessive head movement detected!
+[2025-04-06 21:59:49] Excessive head movement detected!
+[2025-04-06 21:59:49] Excessive head movement detected!
+[2025-04-06 21:59:49] Excessive head movement detected!
+[2025-04-06 21:59:54] ⚠️ ALERT: Mobile phone detected!
+[2025-04-06 22:00:03] ⚠️ ALERT: Mobile phone detected!
+[2025-04-06 22:00:10] ⚠️ ALERT: Mobile phone detected!
+[2025-04-06 22:00:21] Speech detected: controller (Language: it)
+[2025-04-06 22:00:21] WARNING: Non-English speech detected!
+[2025-04-06 22:00:31] ⚠️ ALERT: Mobile phone detected!
+[2025-04-06 22:00:41] ⚠️ ALERT: Mobile phone detected!
+[2025-04-06 22:00:51] ⚠️ ALERT: Mobile phone detected!
+[2025-04-06 22:00:57] ⚠️ ALERT: Mobile phone detected!
+[2025-04-06 22:01:09] ⚠️ ALERT: Mobile phone detected!
+[2025-04-12 18:38:13] No face detected! Test access restricted.
+[2025-04-12 18:38:20] No face detected! Test access restricted.
+[2025-04-12 18:38:26] ⚠️ ALERT: Mobile phone detected!
+[2025-04-12 18:39:25] Speech detected: bread Banane (Language: en)
+[2025-04-12 18:39:35] Excessive head movement detected!
+[2025-04-12 18:39:35] Excessive head movement detected!
+[2025-04-12 18:39:35] Excessive head movement detected!
+[2025-04-12 18:39:35] Excessive head movement detected!
+[2025-04-12 18:39:36] Excessive head movement detected!
+[2025-04-12 18:39:47] ⚠️ ALERT: Mobile phone detected!
