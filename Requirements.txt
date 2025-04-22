@@ -1,7 +1,10 @@
-streamlit 
+
 opencv-python 
 mediapipe 
 ultralytics 
 speechrecognition 
 langdetect
-pyaudio
+sounddevice 
+scipy 
+speechrecognition
+langdetect
