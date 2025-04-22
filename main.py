@@ -11,16 +11,6 @@ import speech_recognition as sr
 import langdetect
 from ultralytics import YOLO
 
-
-import sounddevice as sd
-import scipy.io.wavfile as wav
-from io import BytesIO
-
-recognizer = sr.Recognizer()
-sample_rate = 16000  # Use 16000 Hz sample rate (Google's API prefers this)
-duration = 3  # seconds
-
-
 # ====================== Initialization ======================
 # MediaPipe
 mp_face_mesh = mp.solutions.face_mesh
@@ -40,7 +30,12 @@ y_angles = deque(maxlen=angle_buffer_size)
 
 # Speech Recognition
 recognizer = sr.Recognizer()
-mic = sr.Microphone()
+try:
+    mic = sr.Microphone()
+    microphone_available = True
+except Exception:
+    print("Microphone not available, skipping speech detection.")
+    microphone_available = False
 
 # YOLO Model
 model = YOLO("yolo-Weights/yolov8n.pt")
@@ -65,30 +60,24 @@ alert_cooldown = 5  # seconds
 # ====================== Functions ======================
 def log_event(message):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    with open(log_file, "a", encoding="utf-8") as log:  # <-- UTF-8 encoding added here
+    with open(log_file, "a", encoding="utf-8") as log:
         log.write(f"[{timestamp}] {message}\n")
     print(f"{timestamp} - {message}")
 
 def detect_speech():
+    if not microphone_available:
+        return
     while True:
         try:
             print("Listening for speech...")
-            audio_data = sd.rec(int(duration * sample_rate), samplerate=sample_rate, channels=1, dtype='int16')
-            sd.wait()  # Wait until recording is finished
-
-            # Convert to bytes for recognition
-            byte_io = BytesIO()
-            wav.write(byte_io, sample_rate, audio_data)
-            byte_io.seek(0)
-
-            audio = sr.AudioFile(byte_io)
-            with audio as source:
-                recorded = recognizer.record(source)
-                text = recognizer.recognize_google(recorded)
-                detected_lang = langdetect.detect(text)
-                log_event(f"Speech detected: {text} (Language: {detected_lang})")
-                if detected_lang != "en":
-                    log_event("WARNING: Non-English speech detected!")
+            with mic as source:
+                recognizer.adjust_for_ambient_noise(source)
+                audio = recognizer.listen(source, timeout=5)
+            text = recognizer.recognize_google(audio)
+            detected_lang = langdetect.detect(text)
+            log_event(f"Speech detected: {text} (Language: {detected_lang})")
+            if detected_lang != "en":
+                log_event("WARNING: Non-English speech detected!")
         except sr.UnknownValueError:
             pass
         except sr.RequestError:
@@ -96,11 +85,10 @@ def detect_speech():
         except Exception as e:
             log_event(f"Speech detection error: {str(e)}")
 
-
-
 # Start speech detection thread
-speech_thread = threading.Thread(target=detect_speech, daemon=True)
-speech_thread.start()
+if microphone_available:
+    speech_thread = threading.Thread(target=detect_speech, daemon=True)
+    speech_thread.start()
 
 # ====================== Main Execution ======================
 cap = cv2.VideoCapture(0)
@@ -128,7 +116,7 @@ while cap.isOpened():
     image.flags.writeable = True
     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
-    # ================== Face Count Detection ==================
+    # Face Count Detection
     face_count = 0
     if results_detection.detections:
         face_count = len(results_detection.detections)
@@ -147,7 +135,7 @@ while cap.isOpened():
     elif face_count > 0:
         face_not_detected = False
 
-    # ================== Head Pose Estimation ==================
+    # Head Pose Estimation
     if results_mesh.multi_face_landmarks:
         for face_landmarks in results_mesh.multi_face_landmarks:
             face_3d, face_2d = [], []
@@ -191,7 +179,7 @@ while cap.isOpened():
                 cv2.putText(image, "WARNING: Excessive movement detected!", (20, 100),
                             cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
-    # ================== Phone Detection (YOLO) ==================
+    # Phone Detection (YOLO)
     results = model(image, stream=True)
     phone_detected = False
 
@@ -217,7 +205,7 @@ while cap.isOpened():
             cv2.imwrite(f"alerts/phone_{timestamp}.jpg", image)
             last_alert_time = current_time
 
-    # ================== Display ==================
+    # Display
     end = time.time()
     fps = 1 / (end - start)
     cv2.putText(image, f'FPS: {int(fps)}', (20, 450), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 255, 0), 2)
