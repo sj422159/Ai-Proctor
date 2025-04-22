@@ -11,6 +11,16 @@ import speech_recognition as sr
 import langdetect
 from ultralytics import YOLO
 
+
+import sounddevice as sd
+import scipy.io.wavfile as wav
+from io import BytesIO
+
+recognizer = sr.Recognizer()
+sample_rate = 16000  # Use 16000 Hz sample rate (Google's API prefers this)
+duration = 3  # seconds
+
+
 # ====================== Initialization ======================
 # MediaPipe
 mp_face_mesh = mp.solutions.face_mesh
@@ -59,25 +69,34 @@ def log_event(message):
         log.write(f"[{timestamp}] {message}\n")
     print(f"{timestamp} - {message}")
 
-
 def detect_speech():
     while True:
-        with mic as source:
-            recognizer.adjust_for_ambient_noise(source)
+        try:
             print("Listening for speech...")
-            try:
-                audio = recognizer.listen(source, timeout=3)
-                text = recognizer.recognize_google(audio)
+            audio_data = sd.rec(int(duration * sample_rate), samplerate=sample_rate, channels=1, dtype='int16')
+            sd.wait()  # Wait until recording is finished
+
+            # Convert to bytes for recognition
+            byte_io = BytesIO()
+            wav.write(byte_io, sample_rate, audio_data)
+            byte_io.seek(0)
+
+            audio = sr.AudioFile(byte_io)
+            with audio as source:
+                recorded = recognizer.record(source)
+                text = recognizer.recognize_google(recorded)
                 detected_lang = langdetect.detect(text)
                 log_event(f"Speech detected: {text} (Language: {detected_lang})")
                 if detected_lang != "en":
                     log_event("WARNING: Non-English speech detected!")
-            except sr.UnknownValueError:
-                pass
-            except sr.RequestError:
-                log_event("Error with speech recognition service.")
-            except sr.WaitTimeoutError:
-                pass
+        except sr.UnknownValueError:
+            pass
+        except sr.RequestError:
+            log_event("Error with speech recognition service.")
+        except Exception as e:
+            log_event(f"Speech detection error: {str(e)}")
+
+
 
 # Start speech detection thread
 speech_thread = threading.Thread(target=detect_speech, daemon=True)
