@@ -1,10 +1,5 @@
-
-opencv-python 
-mediapipe 
-ultralytics 
-speechrecognition 
-langdetect
-sounddevice 
-scipy 
-speechrecognition
-langdetect
+flask
+opencv-python
+mediapipe
+numpy
+ultralytics
